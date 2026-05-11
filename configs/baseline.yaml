@@ -1,0 +1,43 @@
+# Baseline harness config for DSN x BCT LLM Agent Challenge.
+# Place the McAuley/Amazon JSONL.GZ files under data/raw/ or update paths below.
+
+raw_reviews:
+  Books: data/raw/Books.jsonl.gz
+  Movies_and_TV: data/raw/Movies_and_TV.jsonl.gz
+
+raw_meta:
+  Books: data/raw/meta_Books.jsonl.gz
+  Movies_and_TV: data/raw/meta_Movies_and_TV.jsonl.gz
+
+output_dir: data/processed/baseline_v0
+
+# Use a cap for fast local iteration. Set to null for full processing.
+# Start small, confirm the harness works, then increase.
+max_reviews_per_domain: 300000
+
+# Core-style filtering.
+# min_user_reviews_total is the user-side activity filter. Set to 10 so each
+# eligible user can support: 7 train + 1 internal_val + 1 shadow_test + 1 final_test.
+# min_item_reviews_total is the item-side activity filter, similar to the item half of 5-core.
+min_user_reviews_total: 10
+min_item_reviews_total: 5
+min_train_reviews: 7
+
+# Chronological split per user: train | internal_val | shadow_test | final_test.
+# internal_val is for normal iteration.
+# shadow_test is a near-final reality check; once used, it is no longer a true test set.
+# final_test should stay untouched until final reporting/paper numbers.
+internal_frac: 0.10
+shadow_frac: 0.10
+final_frac: 0.10
+
+# Later evaluation labels.
+cold_start_train_threshold: 5
+cross_domain_min_train_reviews: 3
+
+# Baseline evaluation.
+top_k: 10
+max_popular_pool: 500
+rating_bias_regularization: 10
+
+random_seed: 42

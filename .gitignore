@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# OS / editor files
+.DS_Store
+.vscode/settings.json
+.idea/
+
+# Large/raw data - DO NOT COMMIT
+/data/raw/
+data/raw/
+*.jsonl.gz
+*.json.gz
+*.csv.gz
+*.tar
+*.tar.gz
+*.zip
+
+# Generated processed data
+/data/processed/
+data/processed/
+*.parquet
+*.duckdb
+*.db
+*.sqlite
+
+# Model/vector outputs
+/artifacts/
+artifacts/
+/chroma/
+chroma/
+/vector_store/
+vector_store/
+*.pkl
+*.joblib
+
+# Logs / temp outputs
+*.log
+logs/
+outputs/
