@@ -117,20 +117,9 @@ def route_breakdown(train: pd.DataFrame, eval_df: pd.DataFrame, cold_start_thres
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run first milestone baseline metrics.")
     parser.add_argument("--config", default="configs/baseline.yaml")
-    parser.add_argument(
-        "--eval-final",
-        action="store_true",
-        help="Evaluate on final_test. Use only at the end after model selection.",
-    )
-    parser.add_argument(
-        "--use-dev-as-train-for-final",
-        action="store_true",
-        help="For final_test only, fit baselines on train+internal_val after model selection.",
-    )
+    parser.add_argument("--use-dev-as-train-for-final", action="store_true",
+                        help="For final_test only, fit baselines on train+internal_val after model selection.")
     args = parser.parse_args()
-
-    if args.use_dev_as_train_for_final and not args.eval_final:
-        print("[warn] --use-dev-as-train-for-final was provided without --eval-final; ignoring it.")
 
     config = load_yaml(args.config)
     output_dir = Path(config["output_dir"])
@@ -138,7 +127,7 @@ def main() -> None:
 
     train = read_split(output_dir, "train")
     internal = read_split(output_dir, "internal_val")
-    final = read_split(output_dir, "final_test") if args.eval_final else None
+    final = read_split(output_dir, "final_test")
 
     k = int(config["top_k"])
     pool_size = int(config["max_popular_pool"])
@@ -149,28 +138,20 @@ def main() -> None:
         "config": config,
         "n_train": int(len(train)),
         "n_internal_val": int(len(internal)),
-        "n_final_test": int(len(final)) if final is not None else "not_evaluated",
+        "n_final_test": int(len(final)),
         "internal_val": {},
+        "final_test": {},
         "notes": [
-            "All development metrics use train-only aggregates and internal_val only.",
-            "final_test is not read or evaluated unless --eval-final is explicitly provided.",
+            "All baselines use train-only aggregates unless --use-dev-as-train-for-final is set.",
             "Popularity recommendations exclude items already seen in the training split.",
             "Use internal_val for iteration. Keep final_test untouched until the paper/debug freeze.",
         ],
     }
 
-    eval_jobs = [("internal_val", internal, train)]
-
-    if args.eval_final:
-        final_fit_df = (
-            pd.concat([train, internal], ignore_index=True)
-            if args.use_dev_as_train_for_final
-            else train
-        )
-        eval_jobs.append(("final_test", final, final_fit_df))
-        report["final_test"] = {}
-
-    for split_name, eval_df, fit_df in eval_jobs:
+    for split_name, eval_df, fit_df in [
+        ("internal_val", internal, train),
+        ("final_test", final, pd.concat([train, internal], ignore_index=True) if args.use_dev_as_train_for_final else train),
+    ]:
         report[split_name] = {
             "rating_baselines": evaluate_rating_models(fit_df, eval_df, regularization=reg),
             "recommendation_baselines": evaluate_popularity_recommenders(fit_df, eval_df, k=k, pool_size=pool_size),
@@ -189,11 +170,6 @@ def main() -> None:
         print(f"  {name:28s} " + " ".join(f"{k}={v:.4f}" for k, v in metrics.items()))
     print("\nRoute breakdown:")
     print(report["internal_val"]["route_breakdown"])
-
-    if args.eval_final:
-        print("\nFinal test was evaluated because --eval-final was provided.")
-    else:
-        print("\nFinal test was not evaluated. Pass --eval-final only when you are ready for final reporting.")
 
 
 if __name__ == "__main__":
