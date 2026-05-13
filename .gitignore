@@ -35,6 +35,7 @@ data/raw/
 *.tar
 *.tar.gz
 *.zip
+*.csv
 
 # Generated processed data
 /data/processed/
