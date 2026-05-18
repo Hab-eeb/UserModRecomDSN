@@ -1,0 +1,41 @@
+# Task A config for on-demand user profiling + rating/review simulation.
+# Paths assume you are running commands from the project root.
+
+data:
+  task_a_dir: data/processed/task_a_iteration_v0
+  train_path: data/processed/task_a_iteration_v0/train.parquet
+  internal_val_path: data/processed/task_a_iteration_v0/internal_val.parquet
+  shadow_test_path: data/processed/task_a_iteration_v0/shadow_test.parquet
+  items_path: data/processed/task_a_iteration_v0/items.parquet
+  profile_cache_dir: data/processed/task_a_iteration_v0/cache/user_profiles
+
+llm:
+  provider: deepseek        # gemini or deepseek
+  temperature: 0.1
+  max_output_tokens: 2200
+  retries: 2
+  timeout: 90
+
+  gemini_model: gemini-2.5-flash-lite
+  # Set this to the exact DeepSeek model your key supports.
+  deepseek_model: deepseek-chat
+
+profile:
+  max_examples: 12
+  n_recent: 4
+  n_high: 3
+  n_low: 3
+  n_same_domain: 4
+
+prediction:
+  locale_hint: null
+  force_profile_refresh: false
+
+evaluation:
+  split: internal_val
+  sample_n: 20
+  random_state: 42
+  sleep_s: 0
+  compute_bertscore: false
+  bertscore_lang: en
+  output_dir: data/processed/task_a_iteration_v0/eval_runs
